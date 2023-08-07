@@ -3,7 +3,7 @@ const sendEmail = require("../middlewares/sendEmail")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
-const jwtsecret = process.env.JWT
+const jwtsecret = process.env.JWT_USER
 const uuid = require("uuid")
 
 
@@ -280,4 +280,38 @@ const getUser = async (request, response) => {
     response.status(200).json({user})
 }
 
-module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser}
+const createPaymentPin = async (request, response) => {
+    const user = request.user
+    const {password, newpin} = request.body
+
+    try{
+
+        if (!password) {
+            return response.status(422).json({status:false, message:"Password is Required"})
+        }
+        if (!newpin) {
+            return response.status(422).json({status:false, message:"Please Enter New Pin"})
+        }
+
+        const user2 = await User.findOne({email:user.email})
+
+        const passwordIsValid = await bcrypt.compare(password, user2.password)
+
+        if (!passwordIsValid) {
+            
+            return response.status(401).json({status:false, message:"Incorrect Password"})
+        }
+
+        user2.paymentPin = newpin
+
+        await user2.save()
+
+
+    }catch(error){
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
+
+
+module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser,createPaymentPin}

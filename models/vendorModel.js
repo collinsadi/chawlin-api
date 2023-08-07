@@ -32,16 +32,10 @@ const vendorSchema = new Schema({
         required: true,
         trim: true
     },
-    shopNo: {
-        type:String,
-    },
     businessName: {
         type: String,
         required: true,
         trim: true
-    },
-    businessLocation: {
-        type: String,
     },
     businessImage: {
         type: String,
@@ -79,12 +73,17 @@ const vendorSchema = new Schema({
         type: Boolean,
         default: false
     },
-    logins: {
+    loginAttempts: {
         type: Number,
-        trim: true,      
+        default: 0,      
     },
     token: {
         type: String,
+            
+    },
+    validated: {
+        type: Boolean,
+        default:false
             
     },
     validationToken: {

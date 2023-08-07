@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
-const jwtsecret = process.env.JWT_USER
-const User = require("../models/userModel")
+const jwtsecret = process.env.JWT_VENDOR
+const Vendor = require("../models/vendorModel")
 
-const checkLogin = async (request,response,next) => {
+
+const checkVendor = async (request,response,next) => {
 
     if (request.headers.authorization && request.headers.authorization.startsWith("Bearer")) {
     
@@ -13,9 +14,9 @@ const checkLogin = async (request,response,next) => {
 
             const decoded = jwt.verify(token,jwtsecret)
 
-            const user = await User.findOne({email:decoded.user.email})
+            const vendor = await Vendor.findOne({email:decoded.vendor.email})
 
-            request.user = user
+            request.vendor = vendor
 
             next()
 
@@ -30,4 +31,6 @@ const checkLogin = async (request,response,next) => {
 
 }
 
-module.exports = checkLogin
+
+
+module.exports = checkVendor

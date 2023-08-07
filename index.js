@@ -9,7 +9,7 @@ const url = process.env.MONGO
 // routes
 const userRoutes = require("./routes/userRoutes")
 const walletRoutes = require("./routes/walletRoutes")
-
+const vendorRoutes = require("./routes/vendorRoutes")
 
 // Middlewares
 app.use(express.json({ limit: "10mb" }))
@@ -36,3 +36,4 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
 app.use(userRoutes)
 app.use(walletRoutes)
+app.use(vendorRoutes)
