@@ -306,7 +306,7 @@ const addVendorAccoountDetails = async (request, response) => {
 
         if (!accountNo || !accountProvider || !accountHolder || !password) {
             
-            
+            return response.status(422).json({status:false, message:"One Field or More is Missing"})
         }
 
         const passwordIsValid = await bcrypt.compare(password, vendor.password)
@@ -334,5 +334,83 @@ const addVendorAccoountDetails = async (request, response) => {
     
 }
 
+const editVendorAccount = async (request, response) => {
 
-module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails}
+    const id = request.vendor._id
+    
+    const { firstName, lastName, mobileNumber, businessName, businessImage } = request.body
+    
+     try{
+
+
+    if(!firstName){
+
+        return response.status(422).json({status:false,message:"First Name is Missing"})
+    }
+
+    if (!lastName) {
+        
+        return response.status(422).json({status:false,message:"Last Name is Missing"})
+    }
+    
+    if(!mobileNumber){
+
+        return response.status(422).json({statu:false, message:"Mobile Number is Required"})
+    }
+
+    if (!businessName) {
+        
+        return response.status(422).json({status:false, message:"Business Name is Required"})
+    }
+
+    if (!businessImage) {
+        
+        return response.status(422).json({status:false, message:"Business Image is Required"})
+    }
+
+    const vendor = await Vendor.findByIdAndUpdate(id,{ firstName, lastName, mobileNumber, businessName, businessImage})
+
+    await vendor.save()
+
+   response.status(201).json({status:true, message:"Account Updated Successfully"})
+
+
+    }catch(error){
+
+         response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
+
+const getVendor = async (request, response) => {
+
+    const id = request.query.vendor
+
+    try {
+    
+        if (!id) {
+
+            return response.status(422).json({ status: false, message: "Vendor Id is Missing" })
+        }
+
+        const vendor = await Vendor.findById(id)
+
+        if (!vendor) {
+
+            return response.status(404).json({ status: false, message: "Vendor Was Not Found" })
+        }
+
+
+        response.status(201).json({ status: true, vendor })
+
+    } catch (error) {
+        
+        response.status(500).json({ status: false, message: "Internal Server Error" })
+        console.log(error)
+    }
+
+}
+
+
+
+ module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails}

@@ -11,5 +11,10 @@ router.post("/vendor/login", loginVendor)
 router.post("/vendor/password/forgotten", forgotPassword)
 router.post("/vendor/password/reset", resetPassword)
 router.post("/vendor/withdrawal/settings",checkVendor,addVendorAccoountDetails )
+router.post("/vendor/account/edit")
+
+
+
+
 
 module.exports = router
