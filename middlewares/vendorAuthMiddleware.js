@@ -16,6 +16,11 @@ const checkVendor = async (request,response,next) => {
 
             const vendor = await Vendor.findOne({email:decoded.vendor.email})
 
+            if (!vendor) {
+                
+                return response.status(401).json({status:false, message:"Unauthorized"})
+            }
+
             request.vendor = vendor
 
             next()
@@ -25,6 +30,9 @@ const checkVendor = async (request,response,next) => {
             response.status(401).json({status:false, message:"Unauthorized"})
             console.log(error)
         }
+
+    } else {
+        response.status(401).json({status:false, message:"Unauthorized"})
 
 }
 

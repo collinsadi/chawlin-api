@@ -273,9 +273,9 @@ const resetPassword = async (request, response) => {
 
 const getUser = async (request, response) => {
     
-    const user = request.user
+    const id = request.user._id
 
-    
+    const user = await User.findById(id)
 
     response.status(200).json({user})
 }

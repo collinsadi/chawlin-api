@@ -13,9 +13,12 @@ const checkLogin = async (request,response,next) => {
 
             const decoded = jwt.verify(token,jwtsecret)
 
-            const user = await User.findOne({email:decoded.user.email})
+            // const user = await User.findOne({email:decoded.user.email})
 
-            request.user = user
+            request.user = decoded.user
+
+            console.log(decoded.user._id)
+            console.log(decoded.signature)
 
             next()
 

@@ -73,6 +73,10 @@ const userSchema = new Schema({
         default:0
             
     },
+    deliveryMails: {
+        type:Boolean,
+        default:true
+    }
 }, { timestamps: true })
 
 
