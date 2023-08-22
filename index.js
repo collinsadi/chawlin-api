@@ -12,7 +12,7 @@ const walletRoutes = require("./routes/walletRoutes")
 const vendorRoutes = require("./routes/vendorRoutes")
 const foodRoutes = require("./routes/foodRoutes")
 const cartRoutes = require("./routes/cartRoutes")
-
+const orderRoutes = require("./routes/orderRoutes")
 
 // Middlewares
 app.use(express.json({ limit: "10mb" }))
@@ -42,3 +42,4 @@ app.use(walletRoutes)
 app.use(vendorRoutes)
 app.use(foodRoutes)
 app.use(cartRoutes)
+app.use(orderRoutes)

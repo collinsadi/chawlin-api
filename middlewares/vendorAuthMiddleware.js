@@ -14,14 +14,14 @@ const checkVendor = async (request,response,next) => {
 
             const decoded = jwt.verify(token,jwtsecret)
 
-            const vendor = await Vendor.findOne({email:decoded.vendor.email})
+            // const vendor = await Vendor.findOne({email:decoded.vendor.email})
 
-            if (!vendor) {
+            // if (!vendor) {
                 
-                return response.status(401).json({status:false, message:"Unauthorized"})
-            }
+            //     return response.status(401).json({status:false, message:"Unauthorized"})
+            // }
 
-            request.vendor = vendor
+            request.vendor = decoded.vendor
 
             next()
 

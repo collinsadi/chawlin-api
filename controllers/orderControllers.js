@@ -331,9 +331,51 @@ const userCancellOrder = async (request, response) => {
             return response.status(422).json({status:false,message:"Oder Id Not Found"})
         }
 
-        const order = await Order.findById()
-   
+        const order = await Order.findById(orderid)
 
+        if(!order){
+
+            return response.status(404).json({statua:false, message:"Order Not Found"})
+        }
+   
+        if (order.user != user) {
+            
+            return response.status(401).json({statua:false, message:"Unauthorized Request"})
+        }
+
+        if(order.status === "packing"){
+
+            return response.status(400).json({status:false, message:"Your Food is already Being Packed You can Not Cancel Order"})
+        }
+
+        if(order.status === "out"){
+
+            return response.status(400).json({status:false, message:"Your Food is already Out For Delivery You can Not Cancel Order"})
+        }
+
+        if(order.status === "delivered"){
+
+            return response.status(400).json({status:false, message:"Your Food has Already Been Delivered, You can Not Cancel Order"})
+        }
+
+
+        const vendor = await Vendor.findById(order.vendor)
+        const userToCredit = await User.findById(user)
+
+        vendor.ballance -= order.amount
+        userToCredit.ballance += order.amount
+        order.cancelled = true
+
+        await userToCredit.save()
+        await vendor.save()
+        await order.save()
+
+        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:user})
+
+
+        sendEmail(vendor.email,"Order Cancelled",`Order ${order._id} Has Been Canceled By User, This May Be Due to Delay in Delivery, Please Try to Meet up Fast deliveries so as to Avoid Cancelation of Future Orders by Users, <b>Your Chowlin Account Has Been Debited the Sum of ${order.amount} Naira and Credited to User's Account as a Canceled Order Reversal Fund</b>.<br><br> Contact Support to Report any Action You think is Required Prior to the Cancelation of this Order`)
+
+        response.status(200).json({status:true, message:"Order Sucessfully Cancelled"})
 
     }catch(error){
 
@@ -342,3 +384,71 @@ const userCancellOrder = async (request, response) => {
     }
 
 }
+const vendorCancellOrder = async (request, response) => {
+    
+    const vendor = request.vendor._id
+
+    const orderid = request.query.order
+
+    try{
+
+        if (!orderid) {
+            
+            return response.status(422).json({status:false,message:"Oder Id Not Found"})
+        }
+
+        const order = await Order.findById(orderid)
+
+        if(!order){
+
+            return response.status(404).json({statua:false, message:"Order Not Found"})
+        }
+   
+        if (order.vendor != vendor) {
+            
+            return response.status(401).json({statua:false, message:"Unauthorized Request"})
+        }
+
+        if(order.status === "packing"){
+
+            return response.status(400).json({status:false, message:"Food is already Being Packed You can Not Cancel Order"})
+        }
+
+        if(order.status === "out"){
+
+            return response.status(400).json({status:false, message:"Food is already Out For Delivery You can Not Cancel Order"})
+        }
+
+        if(order.status === "delivered"){
+
+            return response.status(400).json({status:false, message:"Food has Already Been Delivered, You can Not Cancel Order"})
+        }
+
+
+        const vendor = await Vendor.findById(order.vendor)
+        const userToCredit = await User.findById(order.user)
+
+        vendor.ballance -= order.amount
+        userToCredit.ballance += order.amount
+        order.cancelled = true
+
+        await userToCredit.save()
+        await vendor.save()
+        await order.save()
+
+        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:user})
+
+
+        sendEmail(userToCredit.email,"Order Cancelled",`${userToCredit.firstName}, Your Order #${order._id} Has Been Canceled By Vendor, This May Be Due to Vendor's Inability to Deliver Food or Unavailability of Food<b>Your Chowlin Account Has Been Credited with the Sum of ${order.amount} Naira as a Canceled Order Reversal Fund</b>.<br><br> Contact Support to Report any Action You think is Required Prior to the Cancelation of this Order`)
+
+        response.status(200).json({status:true, message:"Order Sucessfully Cancelled"})
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+module.exports = {newOrder,packingOrder,orderOutForDelivery,orderDelivered,getUserOrders,getVendorOrders,getSingleOrderForVendor,getSingleOrderForUser,userCancellOrder,vendorCancellOrder}
