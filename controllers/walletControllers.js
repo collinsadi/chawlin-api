@@ -1,5 +1,5 @@
 const sendEmail = require("../middlewares/sendEmail")
-const Transaction = require("../models/transactionmodel")
+const Transaction = require("../models/transactionModel")
 const User = require("../models/userModel")
 
 
