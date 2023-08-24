@@ -37,6 +37,12 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
     // use Routes
 
+    app.get("/", (request, response) => {
+        
+    response.json({message:"Welcome To The Chowlin Food App API"})
+
+    })
+
 app.use(userRoutes)
 app.use(walletRoutes)
 app.use(vendorRoutes)
