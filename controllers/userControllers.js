@@ -47,7 +47,7 @@ const newUser = async (request, response) => {
         
         
         
-        const emailToken =("" + Math.random()).substring(2, 8)
+        const emailToken =("" + Math.random()).substring(2, 6)
 
         const user = await User.create({ firstName, lastName, email, password: hashedPassword,validationToken:emailToken,validationTokenExpires: new Date() })
         
@@ -170,7 +170,7 @@ const loginUser = async (request, response) => {
 
         if (!user.validated) {
             
-         const emailToken =("" + Math.random()).substring(2, 8)
+         const emailToken =("" + Math.random()).substring(2, 6)
 
         const html = `<h3>Welcome to Chawlin </h3><br><p>Use this Code to Verify Your Email Address </p><br><br><h1 style="letter-spacing:15px;">${emailToken}</h1><br><br> <p>token is only valid for 10 Minutes </p>`
 

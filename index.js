@@ -5,6 +5,7 @@ require("dotenv").config()
 const morgan = require("morgan")
 const port = process.env.PORT
 const url = process.env.MONGO
+const cors = require("cors")
 
 // routes
 const userRoutes = require("./routes/userRoutes")
@@ -18,7 +19,9 @@ const orderRoutes = require("./routes/orderRoutes")
 app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 app.use(morgan("dev"))
-
+app.use(cors({
+    origin: "https://chowlin.onrender.com",
+}))
 
 
 // start server
