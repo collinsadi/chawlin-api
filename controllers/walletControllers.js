@@ -15,9 +15,11 @@ const fundWallet = async (request, response) => {
             return response.status(422).json({status:false, message:"Please Enter an Amount To fund"})
         }
 
-        if (!pin) {
-            return response.status(422).json({status:false, message: "Please Enter Transaction Pin"})
-        }
+        console.log(amount)
+
+        // if (!pin) {
+        //     return response.status(422).json({status:false, message: "Please Enter Transaction Pin"})
+        // }
 
         // if (pin !== user.paymentPin) {
             
@@ -43,7 +45,7 @@ const fundWallet = async (request, response) => {
             body: JSON.stringify({
                 amount: amount*100 ,
                 email : user.email,
-                callback_url: `http://localhost:5000/users/account/funded`
+                callback_url: `http://localhost:3000/user/dashboard/wallet`
 
             })
         })
@@ -78,9 +80,13 @@ const fundWallet = async (request, response) => {
 const fundStatus = async (request, response) => {
     
     const refrence = request.query.refrence
-    const user = request.user
+    
 
     try {
+        const user = request.user
+        
+        console.log(user)
+
         const url = "https://api.paystack.co/transaction/verify/" + refrence
         const payStackSecretKey = process.env.PAYSTACK_SECRET
 
@@ -92,12 +98,14 @@ const fundStatus = async (request, response) => {
         }
     })
 
-    const data = await res.json()
+        const data = await res.json()
+        
+        // console.log(data)
 
-        // if (user.email !== data.customer.email) {
+        if (user.email !== data.customer.email) {
                 
-        //         return response.status(401).json({status:false, message:"Looks Like an Unauthorized Request"})
-        //     }
+                return response.status(401).json({status:false, message:"Looks Like an Unauthorized Request"})
+            }
 
         console.log(data)
 
@@ -109,6 +117,9 @@ const fundStatus = async (request, response) => {
             const html  = `<p><b>Dear ${user.firstName}</b>, <br> Your Payment Request to Fund Your Account with the sum of<b> ${amount} NGN </b> on ${date.toLocaleDateString(undefined,{day:"2-digit", month:"2-digit", year:"numeric"})}, was Sucessful and Your Acount Have Been Funded. <br><br> Feel Free to Contact Support for any Further Information on Paymemt that you might Need</p>`
             
             const user2 = await User.findOne({ email })
+
+            console.log(user2)
+
             const transaction = await Transaction.create({transactionType:"credit",amount:amount, description:"Account Funding",owner:user2._id, status:"successful"})
 
             user2.ballance += amount
@@ -118,7 +129,7 @@ const fundStatus = async (request, response) => {
 
             sendEmail(email, "Transaction Summary", html)
             
-            return response.status(200).json({status: true, message:"Accound Funded Successfully"})
+            return response.status(200).json({status: true, message:"Account Funded Successfully"})
         }
 
         if (!data.status) {
