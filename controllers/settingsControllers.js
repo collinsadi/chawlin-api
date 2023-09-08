@@ -197,7 +197,7 @@ const changePanicBalance = async (request, response) =>{
         await user.save()
     
 
-
+        response.status(201).json({status:true, message:"Panic Status Updated"})
      
         
 
@@ -210,7 +210,7 @@ const changePanicBalance = async (request, response) =>{
 }
 
 const createPaymentPin = async (request, response) => {
-    const id = request.user._
+    const id = request.user._id
     const {password, newpin} = request.body
 
     try{
@@ -262,6 +262,8 @@ const notificationPrefrences = async (request, response) => {
         user.fundingMails = fundingMails
         user.deliveryMails = deliveryMails
         user.dealsMails = dealsMails
+
+        await user.save()
 
         response.status(200).json({status:true, message:"Notification Prefrences Updated"})
 

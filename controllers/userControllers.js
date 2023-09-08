@@ -182,6 +182,23 @@ const loginUser = async (request, response) => {
             return response.status(401).json({status:false, message:"Please Verify Email", email})
         }
 
+        if (user.twoFactor) {
+          
+            const twoFactorCode = ("" + Math.random()).substring(2, 6)
+
+            const html = `<h3>Hello ${user.firstName}</h3><br><p>Use this Code for Your Two Factor Authentication </p><br><br><h1 style="letter-spacing:15px;">${twoFactorCode}</h1><br><br> <p>Code is only valid for 10 Minutes </p>`
+
+            const mail = sendEmail(email, "Two Factor Code", html)
+            
+            user.twoFactorCode = twoFactorCode
+            user.twoFactorCodeExpires = new Date()
+
+            await user.save()
+
+            return response.status(200).json({status:true, message:"Two Factor Enabled",email})
+
+        }
+
         user.loginAttempts = 0
 
         await user.save()
@@ -189,6 +206,52 @@ const loginUser = async (request, response) => {
         response.status(200).json({status:true, message:"Login Successful",user})
 
         
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+const verifyTwoFactor = async (request, response) => {
+    
+    const { email, code } = request.body
+    
+    try{
+
+    if(!email){
+
+        return response.status(422).json({status:false, message:"Email is Missing"})
+    }
+
+        
+    if (!code) {
+        
+            return response.status(422).json({status:false, message:"Two Factor Code Missing"})
+    }
+
+    const user = await User.findOne({email})
+
+    if (!user) {
+            
+        return response.status(401).json({ status: false, message: "an Error Occured Try Login In again" })
+    }
+
+    if (code != user.twoFactorCode) {
+        
+            return response.status(401).json({status:false, message:"Invalid Code"})
+    }
+        
+
+        user.twoFactorCode = undefined
+        user.twoFactorCodeExpires = undefined
+
+        await user.save()
+        
+        response.status(200).json({status:true, message:"Login Successful",user})
+
+
     }catch(error){
 
         response.status(500).json({status:false, message:"Internal Server Error"})
@@ -286,4 +349,4 @@ const getUser = async (request, response) => {
 
 
 
-module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser}
+module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser,verifyTwoFactor}

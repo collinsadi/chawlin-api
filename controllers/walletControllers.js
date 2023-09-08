@@ -81,9 +81,9 @@ const fundStatus = async (request, response) => {
     
     const refrence = request.query.refrence
     
+    const user = request.user
 
     try {
-        const user = request.user
         
         console.log(user)
 
@@ -100,9 +100,9 @@ const fundStatus = async (request, response) => {
 
         const data = await res.json()
         
-        // console.log(data)
+         console.log(data)
 
-        if (user.email !== data.customer.email) {
+        if (user.email !== data.data.customer.email) {
                 
                 return response.status(401).json({status:false, message:"Looks Like an Unauthorized Request"})
             }
@@ -127,7 +127,13 @@ const fundStatus = async (request, response) => {
             await user2.save()
             await transaction.save()
 
-            sendEmail(email, "Transaction Summary", html)
+
+            if (user2.fundingMails) {
+                
+                sendEmail(email, "Transaction Summary", html)
+            }
+
+            
             
             return response.status(200).json({status: true, message:"Account Funded Successfully"})
         }
@@ -141,10 +147,16 @@ const fundStatus = async (request, response) => {
             
             const transaction = Transaction.create({transactionType:"credit",amount:amount, description:"Account Funding",owner:user._id, status:"failed"})
 
+             const user2 = await User.findOne({ email })
             
             await transaction.save()
 
-            sendEmail(email, "Transaction Summary", html)
+            if (user2.fundingMails) {
+                
+                sendEmail(email, "Transaction Summary", html)
+
+            }
+
             
             return response.staus(200).json({status: false, message:"Transaction Failed"})
         }
@@ -193,12 +205,29 @@ const getUserWalletBallance = async (request, response) => {
 
         const loggedUser = await User.findById(user)
 
-        if (pin !== loggedUser.paymentPin) {
+        let ballance = 0
+        
+        if(user.paymentPin < 0){
+        
+            return response.status(401).json({ status: false, message: "Navigate to Settings Page and Set a Transaction Pin" })
+            
+        }
+
+        if (pin != loggedUser.paymentPin) {
             
             return response.status(401).json({status:false, message:"Incorrect Pin"})
         }
+
+        if (loggedUser.panicStatus) {
+            
+        ballance = loggedUser.panicBallance
+
+        } else {
+
+        ballance = loggedUser.ballance
+
+        }
         
-        const ballance = loggedUser.ballance
         
         response.status(200).json({status:true, ballance})
 
