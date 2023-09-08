@@ -210,6 +210,7 @@ const orderDelivered = async (request, response) => {
         }
 
         order.status = "delivered"
+        order.closed = true
 
         await order.save()
 
@@ -218,6 +219,9 @@ const orderDelivered = async (request, response) => {
             sendEmail(order.user.email,"Order Delivered",`<p>${order.user.firstName}, Your Order from ${order.vendor.businessName} Was Marked as Delivered to ${order.location}, Please Contact Support if you Did not Receive this Order, Don't also Hesitate to report any Abnormal Behaviour or Food Handling to Chowlin Customer Support Center<br> You can also Take a few Minutes of your Time and Rate Your Experience on the Chowlin App</p><br><br><i>You can Disable These Emails from Your Account Section on The Chowlin Website</i>`)
 
         }
+
+
+
 
 
         response.status(200).json({status:true, message:"Order Status Updated"})
@@ -236,10 +240,13 @@ const getUserOrders = async (request, response)=>{
 
     try{
 
-    const orders = await Order.find({user}).populate("vendor").sort({createdAt:-1})
+    // const orders = await Order.find({user}).populate("ven\dor").sort({createdAt:-1})
 
+        const openOrders = await Order.find({user,$and:[{closed:{$eq:false},cancelled:{$ne:true}}]}).populate("vendor").sort({createdAt:-1})
 
-    response.status(200).json({status:true,orders})
+        const closedOrders = await Order.find({user,$and:[{closed:{$eq:true},cancelled:{$ne:true}}]})
+
+    response.status(200).json({status:true,openOrders,closedOrders})
 
     }catch(error){
 
@@ -248,6 +255,7 @@ const getUserOrders = async (request, response)=>{
     }
 
 }
+
 
 const getVendorOrders = async (request, response) => {
     const vendor = request.vendor._id

@@ -27,10 +27,18 @@ const userSchema = new Schema({
         required: true,
         default: 0
     },
+    panicBallance: {
+        type: Number,
+        default: 0
+    },
     paymentPin: {
         type: Number
     },
     points: {
+        type: Number,
+        default:0
+    },
+    phoneNumber: {
         type: Number,
         default:0
     },
@@ -68,15 +76,42 @@ const userSchema = new Schema({
         default:false
             
     },
+    panicStatus: {
+        type: Boolean,
+        default:false
+            
+    },
     loginAttempts: {
         type: Number,
         default:0
             
     },
+
+
+    /**Email Prefrences From Here */
+
     deliveryMails: {
         type:Boolean,
         default:true
-    }
+    },
+    dealsMails: {
+        type:Boolean,
+        default:true
+    },
+    fundingMails: {
+        type:Boolean,
+        default:true
+    },
+    twoFactor: {
+        type:Boolean,
+        default:false
+    },
+    twoFactorCode: {
+        type:Number
+    },
+    twoFactorCodeExpires: {
+        type:String
+    },
 }, { timestamps: true })
 
 

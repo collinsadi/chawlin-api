@@ -34,6 +34,10 @@ const orderSchema = new Schema({
     cancelled: {
         type: Boolean,
         default:false
+    },
+    closed: {
+        type: Boolean,
+        default:false
     }
 
 }, { timestamps: true })

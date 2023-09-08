@@ -160,5 +160,56 @@ const fundStatus = async (request, response) => {
 }
 
 
+const userTransactions = async (request, response) => {
+    
+    const user = request.user._id
 
-module.exports = {fundWallet,fundStatus}
+
+    try {
+    
+        const transactions = await Transaction.find({ owner: user }).sort({ createdAt: -1 })
+        
+    
+        response.status(200).json({status:true, transactions})
+
+    } catch (error) {
+        
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+
+
+}
+
+const getUserWalletBallance = async (request, response) => {
+    
+    const user = request.user._id
+
+    const pin = request.body.pin
+
+
+    try{
+
+        const loggedUser = await User.findById(user)
+
+        if (pin !== loggedUser.paymentPin) {
+            
+            return response.status(401).json({status:false, message:"Incorrect Pin"})
+        }
+        
+        const ballance = loggedUser.ballance
+        
+        response.status(200).json({status:true, ballance})
+
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
+
+
+
+module.exports = {fundWallet,fundStatus,userTransactions,getUserWalletBallance}
