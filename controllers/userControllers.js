@@ -286,4 +286,4 @@ const getUser = async (request, response) => {
 
 
 
-module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser,createPaymentPin}
+module.exports = {newUser,verifyEmail,loginUser,forgotPassword,resetPassword,getUser}
