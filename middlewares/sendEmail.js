@@ -12,7 +12,7 @@ const sendEmail = (email,subject,html) => {
     })
 
     const mailOptions = {
-        from: "collinsadi20@gmail.com",
+        from: "chowlinfood@gmail.com",
         to:email,
         subject: subject,
         html:html

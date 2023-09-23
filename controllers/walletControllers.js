@@ -45,7 +45,7 @@ const fundWallet = async (request, response) => {
             body: JSON.stringify({
                 amount: amount*100 ,
                 email : user.email,
-                callback_url: `https://chowlin.onrender.com/user/dashboard/wallet`
+                 callback_url: `https://chowlin.onrender.com/user/dashboard/wallet`
                 // callback_url: `http://localhost:3000/user/dashboard/wallet`
 
             })

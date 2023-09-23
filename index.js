@@ -6,6 +6,13 @@ const morgan = require("morgan")
 const port = process.env.PORT
 const url = process.env.MONGO
 const cors = require("cors")
+const cron = require("node-cron")
+
+cron.schedule('*/10 * * * *', () => {
+    console.log("Welcome to Chowlin API")
+});
+
+
 
 // routes
 const userRoutes = require("./routes/userRoutes")
@@ -21,12 +28,12 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 app.use(morgan("dev"))
 app.use(cors({
-    origin: "https://chowlin.onrender.com",
-    // origin:"http://localhost:3000"
+     origin: "https://chowlin.onrender.com",
+   // origin:"http://localhost:3000"
 }))
 
 
-
+// start server
 
 app.listen(port, () => {
     
