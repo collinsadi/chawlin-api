@@ -6,6 +6,9 @@ require("dotenv").config()
 const jwtsecret = process.env.JWT_USER
 const uuid = require("uuid")
 
+// const url = "http://localhost:3000"
+const url = "https://chowlin.onrender.com"
+
 
 const newUser = async (request, response) => {
     
@@ -284,8 +287,7 @@ const forgotPassword = async (request, response) => {
 
         await user.save()
 
-        const html = `<p><b>${user.firstName}</b>, You Requested for Password Reset, Please Ignore if You Did Not Initiate this Request and your Password Will not be Changed</p><br><h3><a href="http://localhost:3000/password/reset/${passwordResetToken}>Reset Password</a></h3>  `
-                    
+        const html = `<p><b>${user.firstName}</b>, You Requested for Password Reset, Please Ignore if You Did Not Initiate this Request and your Password Will not be Changed</p><br><h3><a href="${url}/auth/user/password/reset/${passwordResetToken}">Reset Password</a></h3>  `
         const mail = sendEmail(email, "Password Reset", html)
         
         response.status(200).json({status:true,message:"Password Reset Token Successfully Sent"})
