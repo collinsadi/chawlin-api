@@ -1,4 +1,5 @@
 const Vendor = require("../models/vendorModel")
+const Image = require("../models/imageModel")
 const sendEmail = require("../middlewares/sendEmail")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
@@ -67,7 +68,11 @@ const newVendor = async (request, response) => {
         const hashedPassword = await bcrypt.hash(password, 10)
         const emailVerificationtoken = (""+Math.random()).substring(2,8)
     
-        const vendor = await Vendor.create({ firstName, lastName, email, password: hashedPassword, student, mobileNumber, businessName, businessImage,validationToken:emailVerificationtoken, validationTokenExpires: new Date() })
+        const vendor = await Vendor.create({ firstName, lastName, email, password: hashedPassword, student, mobileNumber, businessName,validationToken:emailVerificationtoken, validationTokenExpires: new Date() })
+
+        const image = await Image.create({ url: businessImage, vendor: vendor._id })
+        vendor.businessImage = image._id
+        await vendor.save()
         
 
         const html = `<h3>Welcome to Chawlin </h3><br><p>Use this Code to Verify Your Email Address </p><br><br><h1 style="letter-spacing:15px;">${emailVerificationtoken}</h1><br> <p>token is only valid for 10 Minutes </p>`
@@ -88,6 +93,8 @@ const newVendor = async (request, response) => {
 const verifyEmail = async (request, response) => {
     
     const { email, code } = request.body
+
+    console.log(email, code)
     
 
     try{
@@ -124,7 +131,9 @@ const verifyEmail = async (request, response) => {
 
         await vendor.save()
 
-        response.status(200).json({status:true, message:"Email Verified Successfully", vendor})
+        const updatedVendor = await Vendor.findOne({email})
+
+        response.status(200).json({status:true, message:"Email Verified Successfully", vendor:updatedVendor})
 
     } catch (error) {
 

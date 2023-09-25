@@ -38,7 +38,8 @@ const vendorSchema = new Schema({
         trim: true
     },
     businessImage: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"image"
     },
     verified: {
         type: Boolean,
