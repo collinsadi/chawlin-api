@@ -13,6 +13,10 @@ const vendorSchema = new Schema({
         required: true,
         trim: true
     },
+    uniqueUrl:{
+    type:String,
+    required:true
+    },
     email: {
         type: String,
         required: true,

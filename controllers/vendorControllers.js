@@ -6,6 +6,9 @@ const jwt = require("jsonwebtoken")
 require("dotenv").config()
 const jwtsecret = process.env.JWT_VENDOR
 const uuid = require("uuid")
+const shortid = require("shortid")
+const Food = require("../models/foodModel");
+
 
 // const url = "http://localhost:3000"
 const url = "https://chowlin.onrender.com"
@@ -67,12 +70,16 @@ const newVendor = async (request, response) => {
             
             return response.status(401).json({status:false, message:"he Email Provided is Associated with Another Vendor"})
         }
-        
+
+
+        const joinedName = businessName.split(" ").length > 0 ? businessName.toLowerCase().split(" ").join("-") : businessName.toLowerCase()
+        const joinedWithId = joinedName + "-" + await shortid.generate()
+        const uniqueUrl = joinedWithId.toLowerCase();
 
         const hashedPassword = await bcrypt.hash(password, 10)
         const emailVerificationtoken = (""+Math.random()).substring(2,8)
     
-        const vendor = await Vendor.create({ firstName, lastName, email, password: hashedPassword, student, mobileNumber, businessName,validationToken:emailVerificationtoken, validationTokenExpires: new Date() })
+        const vendor = await Vendor.create({ firstName, lastName, email, password: hashedPassword, student, mobileNumber, businessName,uniqueUrl,validationToken:emailVerificationtoken, validationTokenExpires: new Date() })
 
         const image = await Image.create({ url: businessImage, vendor: vendor._id })
         vendor.businessImage = image._id
@@ -397,24 +404,27 @@ const editVendorAccount = async (request, response) => {
 
 const getVendor = async (request, response) => {
 
-    const id = request.query.vendor
+    const uniqueUrl = request.query.vendor
 
     try {
     
-        if (!id) {
+        if (!uniqueUrl) {
 
             return response.status(422).json({ status: false, message: "Vendor Id is Missing" })
         }
 
-        const vendor = await Vendor.findById(id)
+        const vendor = await Vendor.findOne({uniqueUrl}).populate("businessImage")
 
         if (!vendor) {
 
             return response.status(404).json({ status: false, message: "Vendor Was Not Found" })
         }
 
+        const foods = await Food.find({store:vendor._id})
 
-        response.status(201).json({ status: true, vendor })
+
+
+        response.status(201).json({ status: true, vendor,foods })
 
     } catch (error) {
         
@@ -425,5 +435,19 @@ const getVendor = async (request, response) => {
 }
 
 
+const getVendors = async (request, response)=>{
 
- module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails}
+    try{
+
+const vendors = await Vendor.find({validated:true}).sort({createdAt:-1}).populate("businessImage")
+
+response.status(200).json({status:true, vendors})
+
+    }catch(error){
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
+
+
+ module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor}
