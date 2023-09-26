@@ -308,7 +308,7 @@ const getSingleOrderForUser = async (request, response)=>{
 
     try{
 
-        const order = await Order.findById(orderid).populate("user foods")
+        const order = await Order.findById(orderid)
         
         if (order.user != user) {
             
@@ -459,4 +459,31 @@ const vendorCancellOrder = async (request, response) => {
 
 }
 
-module.exports = {newOrder,packingOrder,orderOutForDelivery,orderDelivered,getUserOrders,getVendorOrders,getSingleOrderForVendor,getSingleOrderForUser,userCancellOrder,vendorCancellOrder}
+
+const getInvoive = async (request, response)=>{
+
+const user = request.user._id
+
+    const orderid = request.query.order
+
+    try{
+
+        const order = await Order.findById(orderid).populate('user vendor foods')
+        
+        if (order.user._id != user) {
+            
+            return response.status(401).json({status:false, message:"Unauthorized Request"})
+        }
+
+
+    response.status(200).json({status:true,order})
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+module.exports = {newOrder,packingOrder,orderOutForDelivery,orderDelivered,getUserOrders,getVendorOrders,getSingleOrderForVendor,getSingleOrderForUser,userCancellOrder,vendorCancellOrder,getInvoive}

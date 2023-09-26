@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const { newOrder, packingOrder, orderOutForDelivery, orderDelivered, getUserOrders, getVendorOrders, getSingleOrderForVendor, getSingleOrderForUser, userCancellOrder, vendorCancellOrder } = require("../controllers/orderControllers")
+const { newOrder, packingOrder, orderOutForDelivery, orderDelivered, getUserOrders, getVendorOrders, getSingleOrderForVendor, getSingleOrderForUser, userCancellOrder, vendorCancellOrder,getInvoive } = require("../controllers/orderControllers")
 const checkLogin = require("../middlewares/authenticationMiddleware")
 const checkVendor = require("../middlewares/vendorAuthMiddleware")
 
@@ -22,6 +22,7 @@ router.get("/order/get/vendor/single",checkVendor,getSingleOrderForVendor)
 router.get("/order/get/user/single",checkLogin,getSingleOrderForUser)
 router.post("/order/cancel/user",checkLogin,userCancellOrder)
 router.post("/order/cancel/vendor",checkVendor,vendorCancellOrder)
+router.get('/order/get/invoice',checkLogin,getInvoive)
 
 
 module.exports = router
