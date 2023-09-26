@@ -28,8 +28,8 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 app.use(morgan("dev"))
 app.use(cors({
-     // origin: "https://chowlin.onrender.com",
-   origin:"http://localhost:3000"
+     origin: "https://chowlin.onrender.com",
+   // origin:"http://localhost:3000"
 }))
 
 

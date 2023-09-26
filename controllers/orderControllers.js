@@ -244,7 +244,7 @@ const getUserOrders = async (request, response)=>{
 
         const openOrders = await Order.find({user,$and:[{closed:{$eq:false},cancelled:{$ne:true}}]}).populate("vendor").sort({createdAt:-1})
 
-        const closedOrders = await Order.find({user,$and:[{closed:{$eq:true},cancelled:{$ne:true}}]})
+        const closedOrders = await Order.find({user,$and:[{closed:{$eq:true},cancelled:{$ne:true}}]}).populate("vendor").sort({createdAt:-1})
 
     response.status(200).json({status:true,openOrders,closedOrders})
 
@@ -469,6 +469,7 @@ const user = request.user._id
     try{
 
         const order = await Order.findById(orderid).populate('user vendor foods')
+
         
         if (order.user._id != user) {
             
