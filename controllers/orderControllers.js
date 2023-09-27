@@ -112,7 +112,10 @@ const packingOrder = async (request, response) => {
             return response.status(404).json({status:false, message:"Order Not Found"})
         }
 
-        if(order.vendor != vendor){
+        console.log(order.vendor._id)
+        console.log(vendor)
+
+        if(order.vendor._id != vendor){
 
             return response.status(401).json({status:false, message:"Unauthorized Request"})
         }
@@ -159,7 +162,7 @@ const orderOutForDelivery = async (request, response) => {
             return response.status(404).json({status:false, message:"Order Not Found"})
         }
 
-        if(order.vendor != vendor){
+        if(order.vendor._id != vendor){
 
             return response.status(401).json({status:false, message:"Unauthorized Request"})
         }
@@ -204,7 +207,7 @@ const orderDelivered = async (request, response) => {
             return response.status(404).json({status:false, message:"Order Not Found"})
         }
 
-        if(order.vendor != vendor){
+        if(order.vendor._id != vendor){
 
             return response.status(401).json({status:false, message:"Unauthorized Request"})
         }
@@ -262,10 +265,16 @@ const getVendorOrders = async (request, response) => {
 
     try{
 
-    const orders = await Order.find({vendor}).populate("vendor").sort({createdAt:-1})
+         const openOrders = await Order.find({vendor,$and:[{closed:{$eq:false},cancelled:{$ne:true}}]}).populate("user").sort({createdAt:-1})
+
+        const closedOrders = await Order.find({vendor,$and:[{closed:{$eq:true},cancelled:{$ne:true}}]}).populate("user").sort({createdAt:-1})
+
+ 
+
+    // const orders = await Order.find({vendor}).populate("user").sort({createdAt:-1})
 
 
-    response.status(200).json({status:true,orders})
+    response.status(200).json({status:true,openOrders,closedOrders})
 
     }catch(error){
 
@@ -394,7 +403,7 @@ const userCancellOrder = async (request, response) => {
 }
 const vendorCancellOrder = async (request, response) => {
     
-    const vendor = request.vendor._id
+    const vendorid = request.vendor._id
 
     const orderid = request.query.order
 
@@ -412,7 +421,7 @@ const vendorCancellOrder = async (request, response) => {
             return response.status(404).json({statua:false, message:"Order Not Found"})
         }
    
-        if (order.vendor != vendor) {
+        if (order.vendor != vendorid) {
             
             return response.status(401).json({statua:false, message:"Unauthorized Request"})
         }
@@ -444,7 +453,7 @@ const vendorCancellOrder = async (request, response) => {
         await vendor.save()
         await order.save()
 
-        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:user})
+        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:userToCredit})
 
 
         sendEmail(userToCredit.email,"Order Cancelled",`${userToCredit.firstName}, Your Order #${order._id} Has Been Canceled By Vendor, This May Be Due to Vendor's Inability to Deliver Food or Unavailability of Food<b>Your Chowlin Account Has Been Credited with the Sum of ${order.amount} Naira as a Canceled Order Reversal Fund</b>.<br><br> Contact Support to Report any Action You think is Required Prior to the Cancelation of this Order`)
@@ -487,4 +496,31 @@ const user = request.user._id
 
 }
 
-module.exports = {newOrder,packingOrder,orderOutForDelivery,orderDelivered,getUserOrders,getVendorOrders,getSingleOrderForVendor,getSingleOrderForUser,userCancellOrder,vendorCancellOrder,getInvoive}
+const vendorInvoice = async (request, response)=>{
+
+    const vendor = request.vendor._id
+
+    const orderid = request.query.order
+
+    try{
+
+        const order = await Order.findById(orderid).populate('user vendor foods')
+
+        
+        if (order.vendor._id != vendor) {
+            
+            return response.status(401).json({status:false, message:"Unauthorized Request"})
+        }
+
+
+    response.status(200).json({status:true,order})
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+module.exports = {newOrder,packingOrder,orderOutForDelivery,orderDelivered,getUserOrders,getVendorOrders,getSingleOrderForVendor,getSingleOrderForUser,userCancellOrder,vendorCancellOrder,getInvoive,vendorInvoice}

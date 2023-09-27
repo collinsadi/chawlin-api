@@ -240,6 +240,86 @@ const getUserWalletBallance = async (request, response) => {
     }
 }
 
+// const verifyBankAccount = async (request, response)=>{
+
+//     const account = request.query.account_number
+//     const bank = request.query.bank_code
 
 
-module.exports = {fundWallet,fundStatus,userTransactions,getUserWalletBallance}
+//     try{
+
+//         const payStackSecretKey = process.env.PAYSTACK_SECRET
+
+
+//       const response = await fetch(`https://api.paystack.co/bank/resolve?account_number=${account}&bank_code=${bank}`,{
+//         method:"GET",
+//         headers:{
+//             "Authorization":`Bearer ${payStackSecretKey}`
+//         }
+//     })
+
+//     const data = await response.json()
+
+//     console.log(data)
+
+//     if(data.status){
+
+//       response.status(200).json({status:true,accountName:data.account_name})
+//     }else{
+
+//         response.status(400).json(data)
+//     }
+
+   
+
+//     }catch(error){
+
+//         response.status(500).json({status:false, message:"Internal Server Error"})
+//         console.log(error)
+//     }
+
+// }
+
+const verifyBankAccount = async (request, response) => {
+    
+    const account = request.query.account_number
+    const bank = request.query.bank_code
+
+
+    try{
+
+        const payStackSecretKey = process.env.PAYSTACK_SECRET
+
+
+      const res = await fetch(`https://api.paystack.co/bank/resolve?account_number=${account}&bank_code=${bank}`,{
+        method:"GET",
+        headers:{
+            "Authorization":`Bearer ${payStackSecretKey}`
+        }
+    })
+
+    const data = await res.json()
+
+    console.log(data)
+
+    if(data.status){
+
+      response.status(200).json(data)
+    }else{
+
+        response.status(400).json(data)
+    }
+
+   
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+    
+}
+
+
+
+module.exports = {fundWallet,fundStatus,userTransactions,getUserWalletBallance,verifyBankAccount}

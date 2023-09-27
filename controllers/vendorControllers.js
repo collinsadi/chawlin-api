@@ -313,7 +313,7 @@ const addVendorAccoountDetails = async (request, response) => {
     
     const vendorId = request.vendor._id
 
-    const { accountNo, accountProvider, accountHolder,password,withdrawalPin } = request.body
+    const { accountNo, accountProvider, accountHolder,password} = request.body
     
     try{
 
@@ -339,7 +339,6 @@ const addVendorAccoountDetails = async (request, response) => {
         vendor.accountHolder = accountHolder
         vendor.accountNo = accountNo
         vendor.accountProvider = accountProvider
-        vendor.withdrawalPin = withdrawalPin
 
         await vendor.save()
 
@@ -449,5 +448,56 @@ response.status(200).json({status:true, vendors})
     }
 }
 
+const getLoggedVendor = async (request, response)=>{
 
- module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor}
+    const id = request.vendor._id
+
+    try{
+
+    const vendor = await Vendor.findById(id)
+
+    if(!vendor){
+
+        return response.status(404).json({status:false, message:"Vendor Not Found"})
+    }
+
+response.status(200).json({status:true, vendor})
+        
+    }catch(error){
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+const getVendorBallance = async (request, response)=>{
+
+    const id = request.vendor._id
+    const pin = request.body.withdrawalPin
+
+    try{
+
+        if(!pin){
+
+            return response.status(422).json({status:false, message:"Pin is Required"})
+        }
+
+        const vendor = await Vendor.findById(id)
+
+        if(pin !== vendor.withdrawalPin){
+
+            return response.status(401).json({status:false, message:"Invalid PIn"})
+        }
+
+        response.status(200).json({status:true, ballance:vendor.ballance})
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+
+ module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance}

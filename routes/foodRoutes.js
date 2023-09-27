@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor} = require("../controllers/foodControllers")
+const {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods } = require("../controllers/foodControllers")
 const checkVendor = require("../middlewares/vendorAuthMiddleware")
 
 
@@ -9,6 +9,7 @@ router.get("/food/get", getFoodByUniqueName)
 router.post("/food/edit/unavailable", checkVendor, markFoodUnavailable)
 router.post("/food/edit/available", checkVendor, markFoodAvailable)
 router.get("/food/get/all",getAllFoodByVendor)
+router.get("/food/get/vendor/logged",checkVendor,getLoggedInVendorFoods)
 
 
 

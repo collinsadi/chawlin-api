@@ -171,6 +171,21 @@ const getAllFoodByVendor = async (request, response) => {
 
 }
 
+const getLoggedInVendorFoods = async (request, response)=>{
+
+    const store = request.vendor._id
+
+    try {
+
+    const menu = await Food.find({store}).sort({createdAt:-1})
+
+    response.status(200).json({status:true, menu})
+
+    } catch(error){
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
 
 
-module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor}
+module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods}
