@@ -387,7 +387,11 @@ const editVendorAccount = async (request, response) => {
         return response.status(422).json({status:false, message:"Business Image is Required"})
     }
 
-    const vendor = await Vendor.findByIdAndUpdate(id,{ firstName, lastName, mobileNumber, businessName, businessImage})
+    const image = await Image.findOne({vendor:id})
+    image.url = businessImage
+    await image.save()
+
+    const vendor = await Vendor.findByIdAndUpdate(id,{ firstName, lastName, mobileNumber, businessName, businessImage:image._id})
 
     await vendor.save()
 
@@ -454,7 +458,7 @@ const getLoggedVendor = async (request, response)=>{
 
     try{
 
-    const vendor = await Vendor.findById(id)
+    const vendor = await Vendor.findById(id).populate("businessImage")
 
     if(!vendor){
 
@@ -484,9 +488,15 @@ const getVendorBallance = async (request, response)=>{
 
         const vendor = await Vendor.findById(id)
 
-        if(pin !== vendor.withdrawalPin){
+        if(pin != vendor.withdrawalPin){
 
             return response.status(401).json({status:false, message:"Invalid PIn"})
+        }
+
+        if(vendor.panicMode){
+
+            return response.status(200).json({status:true, ballance:vendor.panicballance})
+
         }
 
         response.status(200).json({status:true, ballance:vendor.ballance})
@@ -499,5 +509,142 @@ const getVendorBallance = async (request, response)=>{
 
 }
 
+const changeVendorPassword = async (request, response)=>{
 
- module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance}
+    const id = request.vendor._id
+
+    const {oldPassword, newPassword} = request.body
+
+    try{
+
+        if(!oldPassword){
+
+            return response.status(422).json({status:false, message:"Password is Required"})
+        }
+
+        if(!newPassword){
+
+            return response.status(422).json({status:false, message:"New Password Required"})
+        }
+
+        const vendor = await Vendor.findById(id)
+
+        const passwordIsValid = await bcrypt.compare(oldPassword, vendor.password)
+
+        if(!passwordIsValid){
+
+            return response.status(401).json({status:false, message:"Incorrect Password"})
+        }
+
+        const password = await bcrypt.hash(newPassword,10)
+
+        vendor.password = password
+
+        await vendor.save()
+
+        response.status(201).json({status:true, message:"Password Changed"})
+
+    
+
+
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+
+const setVendorPaymentPin = async (request, response)=>{
+
+    const id = request.vendor._id
+    const {pin,password} = request.body
+
+
+    try{
+
+        if(!pin){
+
+            return response.status(422).json({status:false, message:"Please Enter Transaction Pin"})
+        }
+
+        if(pin.length > 4){
+
+            return response.status(422).json({status:false, message:"Pin Must be 4 Characters"})
+        }
+
+        if(!password){
+
+            return response.status(422).json({status:false, message:"Please Enter Password for Validation"})
+        }
+
+        const vendor = await Vendor.findById(id)
+
+
+        const passwordIsValid = await bcrypt.compare(password, vendor.password)
+
+        console.log(vendor)
+        // console.log(passwordIsValid)
+
+        if(!passwordIsValid){
+
+            return response.status(401).json({status:false, message:"Incorrect Password"})
+        }
+
+        vendor.withdrawalPin = pin
+
+        await vendor.save()
+
+        response.status(201).json({status:true, message:"Payment Pin Updated"})
+
+
+
+
+    }catch(error){
+
+        console.log(error)
+        response.status(500).json({status:false, message:"Internal Server Error"})
+    }
+
+
+}
+
+
+const setVendorPanicMode = async (request, response)=>{
+
+    const id = request.vendor._id
+    const {amount,status} = request.body
+
+
+    try{
+
+    if(!amount){
+
+        return response.status(422).json({status:false, message:"Please Enter Panic Amount"})
+    }
+    if(amount > 5000){
+
+        return response.status(401).json({status:false, message:"Panic Ballance can only be 5000 and Lesser"})
+
+    }
+
+    const vendor = await Vendor.findById(id)
+    vendor.panicballance = amount
+    vendor.panicMode = status
+    await vendor.save()
+
+    response.status(201).json({status:true, message:"Panic Mode Updated"})
+
+
+
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+}
+
+ module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance,editVendorAccount,changeVendorPassword,setVendorPaymentPin,setVendorPanicMode}

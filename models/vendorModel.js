@@ -58,6 +58,15 @@ const vendorSchema = new Schema({
         required: true,
         default: 0
     },
+    panicballance: {
+        type: Number,
+        default: 0
+    },
+    panicMode: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     accountNo: {
         type: Number
     },
@@ -68,7 +77,8 @@ const vendorSchema = new Schema({
         type: String
     },
     withdrawalPin: {
-        type: Number
+        type: Number,
+        default:1234
     },
     logged: {
         type: Boolean,
