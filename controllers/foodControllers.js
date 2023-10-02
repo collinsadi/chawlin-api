@@ -187,5 +187,50 @@ const getLoggedInVendorFoods = async (request, response)=>{
     }
 }
 
+const editFood = async (request, response)=>{
 
-module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods}
+    const store = request.vendor._id
+    const id = request.query.food
+    const {foodName, foodDescription,foodPrice,foodImage} = request.body
+
+
+    try{
+
+
+        if (!foodName) {
+            
+            return response.status(422).json({status:false, message:"Food Name is Required"})
+        }
+        if (!foodDescription) {
+            
+            return response.status(422).json({status:false, message:"Food Descritpion is Required"})
+        }
+        if (!foodPrice) {
+            
+            return response.status(422).json({status:false, message:"Food Price is Required"})
+        }
+        if (!foodImage) {
+            
+            return response.status(422).json({status:false, message:"Food Image is Required"})
+        }
+
+        const joinName = `${foodName.split(" ").length > 0 ? foodName.split(" ").join("-").toLowerCase() : foodName.toLowerCase()}-`
+
+        const uniqueName = joinName+await shortid.generate().toLowerCase()
+
+        const editFood = await Food.findByIdAndUpdate(id,{foodName,uniqueName, foodDescription,foodPrice,foodImage})
+
+
+        response.status(201).json({status:true, message:"Food Edited"})
+
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+
+module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods,editFood}
