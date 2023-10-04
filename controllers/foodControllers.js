@@ -196,6 +196,13 @@ const editFood = async (request, response)=>{
 
     try{
 
+        const foodToEdit = await Food.findById(id)
+
+        if(foodToEdit.store != store){
+
+            return response.status(401).json({status:false, message:"You can only Control Food You Created"})
+        }
+
 
         if (!foodName) {
             
@@ -232,5 +239,31 @@ const editFood = async (request, response)=>{
 
 }
 
+const deleteFood = async (request, response)=>{
 
-module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods,editFood}
+    const id = request.query.food
+    const store = request.vendor._id
+
+    try{
+
+    const foodToDelete = await Food.findById(id)
+
+    if(foodToDelete.store != store){
+
+        return response.status(401).json({status:false, message:"You can only Control Food You Created"})
+    }
+
+    await Food.findByIdAndDelete(id)
+
+    response.status(200).json({status:true, message:"food Deleted"})
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+
+module.exports = {createFood,markFoodAvailable,markFoodUnavailable,getFoodByUniqueName,getAllFoodByVendor,getLoggedInVendorFoods,editFood,deleteFood}

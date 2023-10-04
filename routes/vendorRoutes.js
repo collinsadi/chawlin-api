@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance,editVendorAccount,changeVendorPassword,setVendorPaymentPin,setVendorPanicMode} = require("../controllers/vendorControllers")
+const {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance,editVendorAccount,changeVendorPassword,setVendorPaymentPin,setVendorPanicMode,requestWithdrawal} = require("../controllers/vendorControllers")
 const checkVendor = require("../middlewares/vendorAuthMiddleware")
 
 
@@ -20,6 +20,7 @@ router.post("/wallet/ballance/vendor",checkVendor,getVendorBallance)
 router.post("/vendor/settings/security",checkVendor,changeVendorPassword)
 router.post("/vendor/settings/security/paymentpin",checkVendor,setVendorPaymentPin)
 router.post("/vendor/settings/security/panic",checkVendor,setVendorPanicMode)
+router.post("/vendor/withdrawal/request",checkVendor,requestWithdrawal)
 
 
 

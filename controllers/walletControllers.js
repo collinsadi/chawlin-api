@@ -1,6 +1,7 @@
 const sendEmail = require("../middlewares/sendEmail")
 const Transaction = require("../models/transactionModel")
 const User = require("../models/userModel")
+const VendorTransaction = require("../models/vendorTransaction")
 
 
 const fundWallet = async (request, response) => {
@@ -195,6 +196,29 @@ const userTransactions = async (request, response) => {
 
 }
 
+const vendorTransactions = async (request, response) => {
+    
+    const vendor = request.vendor._id
+
+
+    try {
+
+
+    
+        const transactions = await VendorTransaction.find({ owner: vendor }).sort({ createdAt: -1 })
+        
+    
+        response.status(200).json({status:true, transactions})
+
+    } catch (error) {
+        
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+    
+}
+
 const getUserWalletBallance = async (request, response) => {
     
     const user = request.user._id
@@ -284,4 +308,4 @@ const verifyBankAccount = async (request, response) => {
 
 
 
-module.exports = {fundWallet,fundStatus,userTransactions,getUserWalletBallance,verifyBankAccount}
+module.exports = {fundWallet,fundStatus,userTransactions,getUserWalletBallance,verifyBankAccount,vendorTransactions}

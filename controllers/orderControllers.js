@@ -5,7 +5,7 @@ const Vendor = require("../models/vendorModel")
 const User = require("../models/userModel")
 const sendEmail = require("../middlewares/sendEmail")
 const Transaction = require("../models/transactionModel")
-
+const VendorTransaction = require("../models/vendorTransaction")
 
 
 const newOrder = async (request, response) => {
@@ -75,7 +75,9 @@ const newOrder = async (request, response) => {
 
         sendEmail(user.email, "Order Summary", `<p>${user.firstName},You ${orderDetails} to be Delivered at ${location}<br> <b>Your Current Ballance is ${user.ballance} Naira</b><br> You can Track Your Order from Your Dashboard, You Would Receive Emails About Your Order, Except You have Delivery Emails Turned Off <br> Call Vendor on ${vendor.mobileNumber}</p>`)
 
-        const transaction = await Transaction.create({transactionType:"debit",amount,description:`Ordered for food from ${vendor.businessName} `,owner:userId,status:"successfull"})
+        const transaction = await Transaction.create({ transactionType: "debit", amount, description: `Ordered for food from ${vendor.businessName} `, owner: userId, status: "successfull" })
+        
+        const vendorTransaction = await VendorTransaction.create({ transactionType: "credit", amount, description: `Payment for Food from ${user.firstName} ${user.lastName}`, owner: vendor._id, status: "successfull" })
 
         sendEmail(vendor.email,"New Order", `<p>There's a New Order From ${user.firstName} ${user.lastName}, ${orderDetails} to be delivered at ${location}, Your Chowlin Account Have Been Credited Sucessfully</p>`)
 
@@ -387,7 +389,11 @@ const userCancellOrder = async (request, response) => {
         await vendor.save()
         await order.save()
 
-        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:user})
+        const transaction = await Transaction.create({ transactionType: "credit", amount: order.amount, description: `Funds Reversal for Cancelled Order`, status: "sucessfull", owner: user })
+        
+
+                const vendorTransaction = await VendorTransaction.create({ transactionType: "debit", amount: order.amount, description: `Funds Reversal for Canceled order from ${userToCredit.firstName} ${userToCredit.lastName}`, owner: vendor._id, status: "successfull" })
+
 
 
         sendEmail(vendor.email,"Order Cancelled",`Order ${order._id} Has Been Canceled By User, This May Be Due to Delay in Delivery, Please Try to Meet up Fast deliveries so as to Avoid Cancelation of Future Orders by Users, <b>Your Chowlin Account Has Been Debited the Sum of ${order.amount} Naira and Credited to User's Account as a Canceled Order Reversal Fund</b>.<br><br> Contact Support to Report any Action You think is Required Prior to the Cancelation of this Order`)
@@ -453,7 +459,9 @@ const vendorCancellOrder = async (request, response) => {
         await vendor.save()
         await order.save()
 
-        const transaction = await Transaction.create({transactionType:"credit",amount:order.amount,description:`Funds Reversal for Cancelled Order`,status:"sucessfull",owner:userToCredit})
+        const transaction = await Transaction.create({ transactionType: "credit", amount: order.amount, description: `Funds Reversal for Cancelled Order`, status: "sucessfull", owner: userToCredit })
+        const vendorTransaction = await VendorTransaction.create({ transactionType: "debit", amount: order.amount, description: `Funds Reversal for Canceled order from ${userToCredit.firstName} ${userToCredit.lastName}`, owner: vendor._id, status: "successfull" })
+        
 
 
         sendEmail(userToCredit.email,"Order Cancelled",`${userToCredit.firstName}, Your Order #${order._id} Has Been Canceled By Vendor, This May Be Due to Vendor's Inability to Deliver Food or Unavailability of Food<b>Your Chowlin Account Has Been Credited with the Sum of ${order.amount} Naira as a Canceled Order Reversal Fund</b>.<br><br> Contact Support to Report any Action You think is Required Prior to the Cancelation of this Order`)

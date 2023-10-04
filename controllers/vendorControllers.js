@@ -8,6 +8,7 @@ const jwtsecret = process.env.JWT_VENDOR
 const uuid = require("uuid")
 const shortid = require("shortid")
 const Food = require("../models/foodModel");
+const VendorTransaction = require("../models/vendorTransaction")
 
 
 // const url = "http://localhost:3000"
@@ -647,4 +648,54 @@ const setVendorPanicMode = async (request, response)=>{
     }
 }
 
- module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance,editVendorAccount,changeVendorPassword,setVendorPaymentPin,setVendorPanicMode}
+const requestWithdrawal = async (request, response) => {
+    
+    const amount = request.body.amount
+    const id = request.vendor._id
+
+    try{
+
+    if(!amount){
+
+        return response.status(422).json({status:false, message:"Please Enter Amount to Withdraw"})
+    }
+    
+        const vendor = await Vendor.findById(id)
+
+   
+        
+        if (amount == vendor.ballance) {
+            
+            return response.status(400).json({status:false, message:"You can Not Withdraw all Funds"})
+        }
+
+        if (parseInt(amount)+500 > vendor.ballance) {
+            
+            return response.status(400).json({status:false, message:"Insufficient Funds, at Least 500 must be Left in your wallet"})
+        }
+
+        if (!vendor.accountNo) {
+            
+            return response.status(400).json({status:false, message:"You Dont Have any Saved Withdrawal Details"})
+        }
+
+        vendor.ballance -= parseInt(amount)
+        await vendor.save()
+
+        const vendorTransaction = await VendorTransaction.create({ transactionType: "debit", amount:amount, description:`Business Sales Withdrawal` , owner: vendor._id, status: "successfull" })
+
+        sendEmail(vendor.email,"Withdrawal Summary",`Dear ${vendor.firstName}, Your Requested for the Withdrawal of ${amount} NGN from Your Business Named ${vendor.businessName} on Chowlin, You'll Receive a Mail Immediately Withdrawal has been Approved`)
+
+ 
+        response.status(200).json({status:true, message:"Withdrawal Request Submitted"})
+
+
+    }catch(error){
+
+        response.status(500).json({status:false, message:"Internal Server Error"})
+        console.log(error)
+    }
+
+}
+
+ module.exports = {newVendor,verifyEmail,loginVendor,forgotPassword,resetPassword,addVendorAccoountDetails,getVendors,getVendor,getLoggedVendor,getVendorBallance,editVendorAccount,changeVendorPassword,setVendorPaymentPin,setVendorPanicMode,requestWithdrawal}
